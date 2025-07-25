@@ -30,7 +30,7 @@ function App() {
       console.log(data);
 
       // Refresh names list
-      const res = await fetch('https://personalised-image-scan.onrender.com/api/name');
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/name`);
       const updatedList = await res.json();
       setNames(updatedList);
       setName(''); // Clear input field after submission
