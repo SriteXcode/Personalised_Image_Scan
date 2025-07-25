@@ -3,7 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const nameRoute = require('./routes/nameRoute'); // ✅ Importing the route
-const NameModel = require('./models/nameModel'); // ✅ IMPORTANT: This line
+const NameModel = require('./models/Name'); // ✅ IMPORTANT: This line
 
 const app = express();
 const PORT = process.env.PORT || 5000;
