@@ -36,9 +36,10 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .catch(err => console.error('MongoDB connection error:', err));
 
 app.get('/api', async(req, res) => {
-  // res.send('Hello from backend 🎉');
+  res.send('Hello from backend 🎉');
   try {
     const names = await NameModel.find();
+    res.send('Hello from backend 🎉');
     res.status(200).json(names);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching names', error });
