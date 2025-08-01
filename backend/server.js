@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const nameRoute = require('./routes/nameRoute'); // ✅ Importing the route
 const NameModel = require('./models/Name'); // ✅ IMPORTANT: This line
+const uploadRoute = require('./routes/uploadRoute'); // ✅ Importing the upload route
+const upload = require('./middleware/upload'); // ✅ Importing the upload middleware
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,7 +47,7 @@ app.get('/api', async(req, res) => {
   }
 });
 app.use('/api/name', nameRoute); // ✅ Using the route
-
+app.use('/api/image', uploadRoute);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
