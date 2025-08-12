@@ -10,7 +10,7 @@ const UploadForm = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/name");
+      const res = await axios.get("https://personalised-image-scan.onrender.com/api/name");
       setUsers(res.data);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -36,7 +36,7 @@ const UploadForm = () => {
     try {
       setLoading(true);
       await axios.post(
-        "http://localhost:5000/api/name/image",
+        "https://personalised-image-scan.onrender.com/api/name/image",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
