@@ -46,6 +46,15 @@ app.get('/api', async(req, res) => {
     res.status(500).json({ message: 'Error fetching names', error });
   }
 });
+app.get('/api', async(req, res) => {
+  //  res.send('Hello from backend 🎉');
+  try {
+    const names = await NameModel.find();
+    res.status(200).json(names);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching names', error });
+  }
+});
 app.use('/api/name', nameRoute); // ✅ Using the route
 app.use('/api/image', uploadRoute);
 app.listen(PORT, () => {

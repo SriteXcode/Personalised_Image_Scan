@@ -1,27 +1,31 @@
 const express = require('express');
 const router = express.Router();
-const Name = require('../models/Name');
+const upload = require('../cloudinary/uploader');
+const User = require('../models/User');
 
-// @route   POST /api/name
-router.post('/', async (req, res) => {
-  const { name } = req.body;
-
+// POST - upload name + image
+router.post('/image', upload.single('file'), async (req, res) => {
   try {
-    const newName = new Name({ name });
-    const saved = await newName.save();
-    res.status(201).json({ message: 'Name saved', data: saved });
-  } catch (err) {
-    res.status(500).json({ error: 'Something went wrong' });
+    const { name } = req.body;
+    const imageUrl = req.file?.path;
+
+    const user = new User({ name, imageUrl });
+    await user.save();
+
+    res.status(201).json({ message: 'Saved', user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Upload failed' });
   }
 });
 
-// (Optional) GET all names
+// GET - all users
 router.get('/', async (req, res) => {
   try {
-    const allNames = await Name.find();
-    res.status(200).json(allNames);
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json(users);
   } catch (err) {
-    res.status(500).json({ error: 'Error fetching names' });
+    res.status(500).json({ error: 'Failed to fetch' });
   }
 });
 

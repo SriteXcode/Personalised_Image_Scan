@@ -7,12 +7,15 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "cloudinary": "^2.7.0",
+    "cloudinary": "^1.37.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-formidable": "^1.2.0",
     "fs": "^0.0.1-security",
+    "mongoose": "^8.17.0",
     "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "path": "^0.12.7"
   }
 }
