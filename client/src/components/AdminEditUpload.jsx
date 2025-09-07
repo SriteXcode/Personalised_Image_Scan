@@ -59,7 +59,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            // "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -92,7 +92,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
       {previews.length > 0 && (
         <div className="flex gap-2 mb-2 flex-wrap">
           {previews.map((url, index) =>
-            files[index].type.startsWith("image") ? (
+            files[index]?.type?.startsWith("image") ? (
               <img
                 key={index}
                 src={url}
@@ -111,7 +111,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
         </div>
       )}
 
-      {/* Existing edited files */}
+      {/* Existing edited files
       {existingFiles.length > 0 && (
         <div className="mt-4">
           <h4 className="font-semibold mb-2">Already Uploaded Files</h4>
@@ -133,10 +133,10 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
                   className="w-24 h-24 object-cover border rounded"
                 />
               )
-            )}
-          </div>
-        </div>
-      )}
+            )} */}
+          {/* </div> */}
+        {/* </div> */}
+      )
 
       <button
         onClick={handleUpload}

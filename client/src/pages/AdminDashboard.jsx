@@ -383,7 +383,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import AdminEditUpload from "../components/AdminEditUpload";
 // import Socket from "../../Socket";
-import Socket from "../../Socket";
+import socket from "../../Socket";
 
 
 
@@ -410,26 +410,68 @@ const AdminDashboard = () => {
     }
   };
 
+//  useEffect(() => {
+//     fetchOrders();
+
+//     // Listen for new order
+//     socket.on("newOrder", (order) => {
+//       setOrders((prev) => [order, ...prev]);
+//     });
+
+//     // Listen for updated order
+//     socket.on("orderUpdated", (updatedOrder) => {
+//       setOrders((prev) =>
+//         prev.map((order) =>
+//           order._id === updatedOrder._id ? updatedOrder : order
+//         )
+//       );
+//     });
+
+//     return () => {
+//       socket.off("newOrder");
+//       socket.off("orderUpdated");
+//     };
+//   }, []);
+
  useEffect(() => {
     fetchOrders();
+    // ✅ Connect only once
+    socket.connect();
 
-    // Listen for new order
-    Socket.on("newOrder", (order) => {
+    // 🔥 Send test message only once
+    socket.emit("pingFromClient", { msg: "Hello from AdminDashboard 🚀" });
+
+    // Listen for socket events
+    socket.on("newOrder", (order) => {
+      console.log("📩 New Order:", order);
       setOrders((prev) => [order, ...prev]);
     });
 
-    // Listen for updated order
-    Socket.on("orderUpdated", (updatedOrder) => {
+    socket.on("orderStatusUpdated", (update) => {
+      console.log("📩 Order Status Updated:", update);
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
+        prev.map((o) =>
+          o._id === update.orderId ? { ...o, status: update.status } : o
         )
       );
     });
 
+    socket.on("filesUploaded", (update) => {
+      console.log("📩 Files Uploaded:", update);
+    });
+
+    socket.on("orderDeleted", ({ orderId }) => {
+      console.log("❌ Order Deleted:", orderId);
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+    });
+
+    // ✅ Cleanup to avoid multiple connections
     return () => {
-      Socket.off("newOrder");
-      Socket.off("orderUpdated");
+      socket.off("newOrder");
+      socket.off("orderStatusUpdated");
+      socket.off("filesUploaded");
+      socket.off("orderDeleted");
+      socket.disconnect();
     };
   }, []);
 
