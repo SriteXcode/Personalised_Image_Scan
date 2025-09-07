@@ -1,16 +1,26 @@
-const multer = require('multer');
-const path = require('path');
+// const multer = require("multer");
+// const path = require("path");
 
-// Configure where and how files will be stored temporarily
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Make sure this folder exists
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   }
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
+// module.exports = upload;
+
+// middleware/upload.js
+// middleware/upload.js
+const multer = require("multer");
+const { storage } = require("../config/cloudinary");
+
+const upload = multer({ storage });  // THIS is the multer instance
 
 module.exports = upload;
+
+
+

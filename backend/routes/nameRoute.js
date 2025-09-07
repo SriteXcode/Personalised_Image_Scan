@@ -1,15 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../cloudinary/uploader');
+const upload = require("../middleware/upload");
 const User = require('../models/User');
 
 // POST - upload name + image
-router.post('/image', upload.single('file'), async (req, res) => {
+router.post('/image', upload.array('file', 5), async (req, res) => {
   try {
-    const { name } = req.body;
-    const imageUrl = req.file?.path;
 
-    const user = new User({ name, imageUrl });
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+
+    const { name } = req.body;
+    const imageUrls = req.files['images']?.map(file => file.path) || [];
+    const videoUrls = req.files['videos']?.map(file => file.path) || [];
+
+    const user = new User({ name, imageUrls, videoUrls });
     await user.save();
 
     res.status(201).json({ message: 'Saved', user });
@@ -30,3 +35,5 @@ router.get('/', async (req, res) => {
 });
 
 module.exports = router;
+
+

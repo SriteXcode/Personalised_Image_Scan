@@ -3,10 +3,13 @@ import axios from "axios";
 
 const UploadForm = () => {
   const [name, setName] = useState("");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [speedKBs, setSpeedKBs] = useState(0);
+  const [eta, setEta] = useState("Calculating...");
+  const [indexFile, setIndexFile] = useState(null); // main image
 
   const fetchUsers = async () => {
     try {
@@ -23,26 +26,58 @@ const UploadForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!name || !file) {
-      alert("Please enter name and choose a file");
+    if (!name || files.length === 0) {
+      alert("Please enter name and choose files");
       return;
     }
+   
+    setProgress(0);
+    setSpeedKBs(0);
+    setEta("Calculating...");
+    setLoading(true);
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("file", file);
+    const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
+    let uploadedBytes = 0;
+    const startTime = Date.now();
 
     try {
-      setLoading(true);
-      await axios.post(
-        "https://personalised-image-scan.onrender.com/api/name/image",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+      await Promise.all(
+        files.map((file) => {
+          const formData = new FormData();
+          formData.append("name", name);
+          formData.append("file", file);
+
+          return axios.post(
+            "https://personalised-image-scan.onrender.com/api/name/image",
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+              onUploadProgress: (progressEvent) => {
+                uploadedBytes += progressEvent.loaded;
+                const percent = Math.round((uploadedBytes * 100) / totalBytes);
+                setProgress(percent);
+
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                const speed = uploadedBytes / 1024 / elapsedTime;
+                setSpeedKBs(speed.toFixed(2));
+
+                const remainingBytes = totalBytes - uploadedBytes;
+                const remainingSeconds = remainingBytes / (speed * 1024);
+                setEta(
+                  remainingSeconds > 60
+                    ? `${Math.ceil(remainingSeconds / 60)} min`
+                    : `${Math.ceil(remainingSeconds)} sec`
+                );
+              },
+            }
+          );
+        })
       );
-      alert("Uploaded successfully!");
+
+      alert("All uploads finished!");
       setName("");
-      setFile(null);
+      setFiles([]);
+      setIndexFile(null);
       fetchUsers();
     } catch (err) {
       console.error("Upload error:", err);
@@ -52,27 +87,23 @@ const UploadForm = () => {
     }
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragActive(false);
+  const handleFileChange = (e) => {
+    setFiles(Array.from(e.target.files));
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    setDragActive(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile(droppedFile);
-    }
+    setFiles(Array.from(e.dataTransfer.files));
+  };
+
+  const getProgressColor = (percent) => {
+    const hue = percent * 1.2;
+    return `hsl(${hue}, 100%, 40%)`;
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "500px", margin: "auto" }}>
-      <h2 style={{ color: "red", textAlign: "center" }}>🚀 Upload Name + Image</h2>
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
+      <h2 style={{ color: "red", textAlign: "center" }}>🚀 Upload Files</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -85,59 +116,76 @@ const UploadForm = () => {
             padding: "10px",
             borderRadius: "6px",
             border: "1px solid #ccc",
-            outline: "none",
           }}
         />
 
         {/* Drag & Drop Zone */}
         <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
           style={{
-            border: dragActive ? "2px dashed #ff4d4d" : "2px dashed #ccc",
-            padding: "30px",
+            border: "2px dashed #ccc",
+            padding: "20px",
             marginBottom: "10px",
             textAlign: "center",
             borderRadius: "10px",
-            backgroundColor: dragActive ? "#ffe6e6" : "#fafafa",
+            backgroundColor: "#fafafa",
             cursor: "pointer",
-            boxShadow: dragActive
-              ? "0px 0px 10px rgba(255,0,0,0.4)"
-              : "0px 0px 5px rgba(0,0,0,0.1)",
-            transition: "0.3s",
           }}
           onClick={() => document.getElementById("fileInput").click()}
         >
-          {file ? (
-            <p style={{ color: "#ff4d4d" }}>📂 {file.name}</p>
+          {files.length > 0 ? (
+            <p>{files.length} file(s) selected</p>
           ) : (
-            <p style={{ color: dragActive ? "#ff4d4d" : "#666" }}>
-              Drag & drop an image here, or click to select
-            </p>
+            <p>Drag & drop files here or click to select</p>
           )}
         </div>
 
-        {/* Hidden File Input */}
         <input
           type="file"
           id="fileInput"
-          onChange={(e) => setFile(e.target.files[0])}
+          multiple
+          onChange={handleFileChange}
           style={{ display: "none" }}
         />
+
+        {/* Preview Section */}
+        {files.length > 0 && (
+          <div style={{ marginBottom: "10px" }}>
+            {files.map((file) => (
+              <div key={file.name} style={{ marginBottom: "10px" }}>
+                {file.type.startsWith("image/") && (
+                  <>
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      style={{ width: "100px", borderRadius: "6px" }}
+                    />
+
+                  </>
+                )}
+                {file.type.startsWith("video/") && (
+                  <video
+                    src={URL.createObjectURL(file)}
+                    controls
+                    style={{ width: "200px", borderRadius: "6px" }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <button
           type="submit"
           style={{
-            padding: "10px 16px",
-            backgroundColor: loading ? "#ff9999" : "#ff4d4d",
+            padding: "10px",
+            backgroundColor: "#ff4d4d",
             color: "#fff",
             border: "none",
             borderRadius: "6px",
-            cursor: loading ? "not-allowed" : "pointer",
             width: "100%",
             fontWeight: "bold",
-            transition: "0.3s",
           }}
           disabled={loading}
         >
@@ -145,41 +193,42 @@ const UploadForm = () => {
         </button>
       </form>
 
+      {/* Progress Display */}
       {loading && (
-        <p style={{ color: "red", textAlign: "center", marginTop: "10px" }}>
-          Please wait, uploading...
-        </p>
+        <div style={{ marginTop: "10px" }}>
+          <div
+            style={{
+              height: "20px",
+              backgroundColor: "#ddd",
+              borderRadius: "5px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${progress}%`,
+                backgroundColor: getProgressColor(progress),
+                transition: "width 0.2s ease, background-color 0.2s ease",
+              }}
+            />
+          </div>
+          <p>
+            {progress}% – {speedKBs} KB/s – ETA: {eta}
+          </p>
+        </div>
       )}
 
       <hr />
-
       <h3 style={{ color: "red" }}>Uploaded Users</h3>
       {users.length === 0 ? (
         <p>No users uploaded yet.</p>
       ) : (
         users.map((user) => (
-          <div
-            key={user._id}
-            style={{
-              marginBottom: "15px",
-              padding: "10px",
-              border: "1px solid #eee",
-              borderRadius: "8px",
-              backgroundColor: "#fff8f8",
-            }}
-          >
-            <strong style={{ color: "#ff4d4d" }}>{user.name}</strong>
+          <div key={user._id} style={{ marginBottom: "15px" }}>
+            <strong>{user.name}</strong>
             <br />
-            <img
-              src={user.imageUrl}
-              alt={user.name}
-              style={{
-                width: "100px",
-                borderRadius: "8px",
-                marginTop: "5px",
-                border: "2px solid #ff4d4d",
-              }}
-            />
+            <img src={user.imageUrl} alt={user.name} width="100" />
           </div>
         ))
       )}
