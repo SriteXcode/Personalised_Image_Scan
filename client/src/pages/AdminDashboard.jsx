@@ -379,7 +379,7 @@
 
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../Api";
 import Navbar from "../components/Navbar";
 import AdminEditUpload from "../components/AdminEditUpload";
 // import Socket from "../../Socket";
@@ -398,7 +398,7 @@ const AdminDashboard = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.get("http://localhost:5000/api/orders", {
+      const { data } = await API.get("/orders", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(data);
@@ -478,7 +478,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/orders/${id}`, {
+      await API.delete(`/orders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders((prev) => prev.filter((o) => o._id !== id));
@@ -490,13 +490,9 @@ const AdminDashboard = () => {
   const handleStatusChange = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.put(
-        `http://localhost:5000/api/orders/${id}`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const { data } = await API.put(`/orders/${id}`, { status }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setOrders((prev) =>
         prev.map((o) => (o._id === id ? { ...o, status: data.status } : o))
       );

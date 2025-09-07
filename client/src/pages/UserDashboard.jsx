@@ -100,7 +100,7 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import axios from "axios";
+import API from "../Api";
 
 const UserDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -109,7 +109,7 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/orders", {
+        const res = await API.get("/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrders(res.data);
