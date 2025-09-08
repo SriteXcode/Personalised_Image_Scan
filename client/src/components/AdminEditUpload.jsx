@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import API from "../Api"
 
 const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
   const [files, setFiles] = useState([]);
@@ -54,7 +55,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.put(
+      const { data } = await API.put(
         `http://localhost:5000/api/orders/${orderId}/upload-edited`,
         formData,
         {
@@ -136,7 +137,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
             )} */}
           {/* </div> */}
         {/* </div> */}
-      )
+      {/* ) */}
 
       <button
         onClick={handleUpload}

@@ -378,14 +378,391 @@
 // export default AdminDashboard;
 
 
+// import React, { useEffect, useState } from "react";
+// import API from "../Api";
+// import Navbar from "../components/Navbar";
+// import AdminEditUpload from "../components/AdminEditUpload";
+// // import Socket from "../../Socket";
+// import socket from "../../Socket";
+
+
+
+// const AdminDashboard = () => {
+//   const [orders, setOrders] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [search, setSearch] = useState("");
+//   const [statusFilter, setStatusFilter] = useState("all");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const ordersPerPage = 5; // adjust as needed
+
+//   const fetchOrders = async () => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       const { data } = await API.get("/orders", {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setOrders(data);
+//     } catch (error) {
+//       console.error("Error fetching admin orders:", error);
+//       alert("Failed to fetch orders!");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+// //  useEffect(() => {
+// //     fetchOrders();
+
+// //     // Listen for new order
+// //     socket.on("newOrder", (order) => {
+// //       setOrders((prev) => [order, ...prev]);
+// //     });
+
+// //     // Listen for updated order
+// //     socket.on("orderUpdated", (updatedOrder) => {
+// //       setOrders((prev) =>
+// //         prev.map((order) =>
+// //           order._id === updatedOrder._id ? updatedOrder : order
+// //         )
+// //       );
+// //     });
+
+// //     return () => {
+// //       socket.off("newOrder");
+// //       socket.off("orderUpdated");
+// //     };
+// //   }, []);
+
+// //  useEffect(() => {
+// //     fetchOrders();
+// //     // ✅ Connect only once
+// //     socket.connect();
+
+// //     // 🔥 Send test message only once
+// //     socket.emit("pingFromClient", { msg: "Hello from AdminDashboard 🚀" });
+
+// //     // Listen for socket events
+// //     socket.on("newOrder", (order) => {
+// //       console.log("📩 New Order:", order);
+// //       setOrders((prev) => [order, ...prev]);
+// //     });
+
+// //     socket.on("orderStatusUpdated", (update) => {
+// //       console.log("📩 Order Status Updated:", update);
+// //       setOrders((prev) =>
+// //         prev.map((o) =>
+// //           o._id === update.orderId ? { ...o, status: update.status } : o
+// //         )
+// //       );
+// //     });
+
+// //     socket.on("filesUploaded", (update) => {
+// //       console.log("📩 Files Uploaded:", update);
+// //     });
+
+// //     socket.on("orderDeleted", ({ orderId }) => {
+// //       console.log("❌ Order Deleted:", orderId);
+// //       setOrders((prev) => prev.filter((o) => o._id !== orderId));
+// //     });
+
+// //     // ✅ Cleanup to avoid multiple connections
+// //     return () => {
+// //       socket.off("newOrder");
+// //       socket.off("orderStatusUpdated");
+// //       socket.off("filesUploaded");
+// //       socket.off("orderDeleted");
+// //       socket.disconnect();
+// //     };
+// //   }, []);
+
+//   const handleDelete = async (id) => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       await API.delete(`/orders/${id}`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setOrders((prev) => prev.filter((o) => o._id !== id));
+//     } catch (err) {
+//       console.error("Error deleting order:", err);
+//     }
+//   };
+
+//   const handleStatusChange = async (id, status) => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       const { data } = await API.put(`/orders/${id}`, { status }, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setOrders((prev) =>
+//         prev.map((o) => (o._id === id ? { ...o, status: data.status } : o))
+//       );
+//     } catch (err) {
+//       console.error("Error updating status:", err);
+//     }
+//   };
+
+//   const handleUploadSuccess = (updatedOrder) => {
+//     setOrders((prev) =>
+//       prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
+//     );
+//   };
+
+  
+
+//   // ---- Search + Filter ----
+//   const filteredOrders = orders.filter((order) => {
+//     const query = search.toLowerCase();
+//     const matchesSearch =
+//       order.user?.name?.toLowerCase().includes(query) ||
+//       order.user?.email?.toLowerCase().includes(query) ||
+//       order.category?.toLowerCase().includes(query) ||
+//       order.status?.toLowerCase().includes(query);
+
+//     const matchesStatus =
+//       statusFilter === "all" || order.status === statusFilter;
+
+//     return matchesSearch && matchesStatus;
+//   });
+
+//   // ---- Pagination ----
+//   const indexOfLastOrder = currentPage * ordersPerPage;
+//   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+//   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+//   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+//   if (loading) return <div className="p-6">Loading orders...</div>;
+
+//   return (
+//     <div>
+//       <Navbar />
+//       <div className="p-6">
+//         <h1 className="text-2xl font-bold mb-6">Admin Dashboard 🛠️</h1>
+
+//         {/* Search + Filter Controls */}
+//         <div className="flex flex-col md:flex-row gap-4 mb-6">
+//           <input
+//             type="text"
+//             placeholder="Search by user, email, category, or status..."
+//             value={search}
+//             onChange={(e) => {
+//               setSearch(e.target.value);
+//               setCurrentPage(1);
+//             }}
+//             className="flex-1 p-2 border rounded"
+//           />
+
+//           <select
+//             value={statusFilter}
+//             onChange={(e) => {
+//               setStatusFilter(e.target.value);
+//               setCurrentPage(1);
+//             }}
+//             className="p-2 border rounded"
+//           >
+//             <option value="all">All Status</option>
+//             <option value="pending">Pending</option>
+//             <option value="approved">Approved</option>
+//             <option value="completed">Completed</option>
+//             <option value="rejected">Rejected</option>
+//           </select>
+//         </div>
+
+//         {currentOrders.length === 0 ? (
+//           <p className="text-gray-600">No orders found.</p>
+//         ) : (
+//           <div className="space-y-6">
+//             {currentOrders.map((order) => (
+//               <div
+//                 key={order._id}
+//                 className="border p-4 rounded-lg shadow-md bg-white"
+//               >
+//                 <h2 className="text-lg font-semibold mb-2">
+//                   Order: {order._id}
+//                 </h2>
+
+//                 {/* User Info */}
+//                 <p>
+//                   <strong>User:</strong>{" "}
+//                   {order.user ? (
+//                     <>
+//                       {order.user.name}{" "}
+//                       <span className="text-gray-500">
+//                         ({order.user.email})
+//                       </span>
+//                     </>
+//                   ) : (
+//                     "Unknown User"
+//                   )}
+//                 </p>
+
+//                 <p>
+//                   <strong>Category:</strong> {order.category}
+//                 </p>
+
+//                 <p>
+//                   <strong>Status:</strong>{" "}
+//                   <span
+//                     className={`px-2 py-1 rounded text-white ${
+//                       order.status === "pending"
+//                         ? "bg-yellow-500"
+//                         : order.status === "completed"
+//                         ? "bg-green-600"
+//                         : order.status === "approved"
+//                         ? "bg-blue-500"
+//                         : "bg-red-500"
+//                     }`}
+//                   >
+//                     {order.status}
+//                   </span>
+//                 </p>
+
+//                 {order.userNote && (
+//                   <p>
+//                     <strong>User Note:</strong> {order.userNote}
+//                   </p>
+//                 )}
+//                 {order.adminNote && (
+//                   <p>
+//                     <strong>Admin Note:</strong> {order.adminNote}
+//                   </p>
+//                 )}
+
+//                 {/* Files Section */}
+//                 {order.files?.length > 0 && (
+//                   <div className="mt-3">
+//                     <b>Files:</b>
+//                     <div className="flex flex-wrap gap-4 mt-2">
+//                       {order.files.map((f) =>
+//                         f.fileType === "image" ? (
+//                           <img
+//                             key={f._id}
+//                             src={f.fileUrl}
+//                             alt="Uploaded"
+//                             className="w-28 h-28 object-cover rounded shadow"
+//                           />
+//                         ) : (
+//                           <video
+//                             key={f._id}
+//                             src={f.fileUrl}
+//                             controls
+//                             className="w-40 rounded shadow"
+//                           />
+//                         )
+//                       )}
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 {/* Edited Files Section */}
+//                 {order.editedFiles?.length > 0 && (
+//                   <div className="mt-3">
+//                     <b>Edited Files:</b>
+//                     <div className="flex flex-wrap gap-4 mt-2">
+//                       {order.editedFiles.map((ef) =>
+//                         ef.fileUrl.endsWith(".mp4") ? (
+//                           <video
+//                             key={ef._id}
+//                             src={ef.fileUrl}
+//                             controls
+//                             className="w-40 rounded shadow"
+//                           />
+//                         ) : (
+//                           <img
+//                             key={ef._id}
+//                             src={ef.fileUrl}
+//                             alt="Edited"
+//                             className="w-28 h-28 object-cover rounded shadow"
+//                           />
+//                         )
+//                       )}
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 {/* Upload Edited File */}
+//                 {order.status !== "completed" && (
+//                   <AdminEditUpload
+//                     orderId={order._id}
+//                     onUploadSuccess={handleUploadSuccess}
+//                   />
+//                 )}
+
+//                 {/* Action Buttons */}
+//                 <div className="mt-4 flex gap-3">
+//                   {order.status === "pending" && (
+//                     <>
+//                       <button
+//                         onClick={() =>
+//                           handleStatusChange(order._id, "approved")
+//                         }
+//                         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//                       >
+//                         Approve
+//                       </button>
+//                       <button
+//                         onClick={() =>
+//                           handleStatusChange(order._id, "rejected")
+//                         }
+//                         className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+//                       >
+//                         Reject
+//                       </button>
+//                     </>
+//                   )}
+//                   <button
+//                     onClick={() => handleDelete(order._id)}
+//                     className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+//                   >
+//                     Delete
+//                   </button>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+
+//         {/* Pagination Controls */}
+//         {totalPages > 1 && (
+//           <div className="flex justify-center mt-6 space-x-2">
+//             <button
+//               disabled={currentPage === 1}
+//               onClick={() => setCurrentPage((p) => p - 1)}
+//               className="px-3 py-1 border rounded disabled:opacity-50"
+//             >
+//               Prev
+//             </button>
+//             {Array.from({ length: totalPages }, (_, i) => (
+//               <button
+//                 key={i}
+//                 onClick={() => setCurrentPage(i + 1)}
+//                 className={`px-3 py-1 border rounded ${
+//                   currentPage === i + 1 ? "bg-blue-500 text-white" : ""
+//                 }`}
+//               >
+//                 {i + 1}
+//               </button>
+//             ))}
+//             <button
+//               disabled={currentPage === totalPages}
+//               onClick={() => setCurrentPage((p) => p + 1)}
+//               className="px-3 py-1 border rounded disabled:opacity-50"
+//             >
+//               Next
+//             </button>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AdminDashboard;
+
+
 import React, { useEffect, useState } from "react";
 import API from "../Api";
 import Navbar from "../components/Navbar";
 import AdminEditUpload from "../components/AdminEditUpload";
-// import Socket from "../../Socket";
-import socket from "../../Socket";
-
-
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -395,6 +772,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5; // adjust as needed
 
+  // ✅ Fetch orders (only API, no socket)
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -410,71 +788,11 @@ const AdminDashboard = () => {
     }
   };
 
-//  useEffect(() => {
-//     fetchOrders();
-
-//     // Listen for new order
-//     socket.on("newOrder", (order) => {
-//       setOrders((prev) => [order, ...prev]);
-//     });
-
-//     // Listen for updated order
-//     socket.on("orderUpdated", (updatedOrder) => {
-//       setOrders((prev) =>
-//         prev.map((order) =>
-//           order._id === updatedOrder._id ? updatedOrder : order
-//         )
-//       );
-//     });
-
-//     return () => {
-//       socket.off("newOrder");
-//       socket.off("orderUpdated");
-//     };
-//   }, []);
-
- useEffect(() => {
+  useEffect(() => {
     fetchOrders();
-    // ✅ Connect only once
-    socket.connect();
-
-    // 🔥 Send test message only once
-    socket.emit("pingFromClient", { msg: "Hello from AdminDashboard 🚀" });
-
-    // Listen for socket events
-    socket.on("newOrder", (order) => {
-      console.log("📩 New Order:", order);
-      setOrders((prev) => [order, ...prev]);
-    });
-
-    socket.on("orderStatusUpdated", (update) => {
-      console.log("📩 Order Status Updated:", update);
-      setOrders((prev) =>
-        prev.map((o) =>
-          o._id === update.orderId ? { ...o, status: update.status } : o
-        )
-      );
-    });
-
-    socket.on("filesUploaded", (update) => {
-      console.log("📩 Files Uploaded:", update);
-    });
-
-    socket.on("orderDeleted", ({ orderId }) => {
-      console.log("❌ Order Deleted:", orderId);
-      setOrders((prev) => prev.filter((o) => o._id !== orderId));
-    });
-
-    // ✅ Cleanup to avoid multiple connections
-    return () => {
-      socket.off("newOrder");
-      socket.off("orderStatusUpdated");
-      socket.off("filesUploaded");
-      socket.off("orderDeleted");
-      socket.disconnect();
-    };
   }, []);
 
+  // ✅ Delete order
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -487,12 +805,17 @@ const AdminDashboard = () => {
     }
   };
 
+  // ✅ Update status
   const handleStatusChange = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
-      const { data } = await API.put(`/orders/${id}`, { status }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await API.put(
+        `/orders/${id}`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setOrders((prev) =>
         prev.map((o) => (o._id === id ? { ...o, status: data.status } : o))
       );
@@ -501,13 +824,12 @@ const AdminDashboard = () => {
     }
   };
 
+  // ✅ Update edited files
   const handleUploadSuccess = (updatedOrder) => {
     setOrders((prev) =>
       prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
     );
   };
-
-  
 
   // ---- Search + Filter ----
   const filteredOrders = orders.filter((order) => {

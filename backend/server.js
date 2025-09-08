@@ -97,13 +97,61 @@
 //   console.log(`🚀 Server running on http://localhost:${PORT}`);
 // });
 
+// const express = require("express");
+// const cors = require("cors");
+// require("dotenv").config();
+// require("./config/cloudinary");
+
+// const http = require("http");
+// const { initSocket } = require("./socket"); // 👈 import socket setup
+
+// const authRoutes = require("./routes/authRoutes");
+// const orderRoutes = require("./routes/orderRoutes");
+// const nameRoute = require("./routes/nameRoute");
+// const NameModel = require("./models/Image");
+// const connectDB = require("./config/db");
+
+// const app = express();
+// const PORT = process.env.PORT || 5000;
+
+// const allowedOrigins = [
+//   "https://personalised-image-scan-1.onrender.com",
+//   "http://localhost:5173",
+// ];
+
+// app.use(cors({ origin: allowedOrigins, credentials: true }));
+// app.use(express.json());
+
+// const server = http.createServer(app);
+
+// // 🔥 Initialize socket.io once
+// initSocket(server, allowedOrigins);
+
+// connectDB();
+
+// // Routes
+// app.use("/api/name", nameRoute);
+// app.use("/api/auth", authRoutes);
+// app.use("/api/orders", orderRoutes);
+
+// app.get("/api", async (req, res) => {
+//   try {
+//     const names = await NameModel.find();
+//     res.json(names);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching names" });
+//   }
+// });
+
+// server.listen(PORT, () => {
+//   console.log(`🚀 Server running on http://localhost:${PORT}`);
+// });
+
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 require("./config/cloudinary");
-
-const http = require("http");
-const { initSocket } = require("./socket"); // 👈 import socket setup
 
 const authRoutes = require("./routes/authRoutes");
 const orderRoutes = require("./routes/orderRoutes");
@@ -115,25 +163,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
-  "https://personalised-image-scan-1.onrender.com",
-  "http://localhost:5173",
+  "https://personalised-image-scan-1.onrender.com", // client (Render)
+  "http://localhost:5173", // local dev
 ];
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+// ✅ Middlewares
+app.use(cors({ 
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true 
+}));
 app.use(express.json());
 
-const server = http.createServer(app);
-
-// 🔥 Initialize socket.io once
-initSocket(server, allowedOrigins);
-
+// ✅ Connect DB
 connectDB();
 
-// Routes
+// ✅ Routes
 app.use("/api/name", nameRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
+// ✅ Test route
 app.get("/api", async (req, res) => {
   try {
     const names = await NameModel.find();
@@ -143,6 +193,7 @@ app.get("/api", async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+// ✅ Start server
+app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

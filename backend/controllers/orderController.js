@@ -257,10 +257,7 @@
 //   }
 // };
 
-
-
 const Order = require("../models/Order");
-const { getIO } = require("../socket"); // 👈 import socket instance
 
 // ✅ Create new order
 exports.createOrder = async (req, res) => {
@@ -278,9 +275,6 @@ exports.createOrder = async (req, res) => {
       userNote,
       files,
     });
-
-    // Emit event
-    getIO().emit("newOrder", order);
 
     res.status(201).json(order);
   } catch (error) {
@@ -300,11 +294,6 @@ exports.uploadEditedFiles = async (req, res) => {
     );
 
     if (!order) return res.status(404).json({ message: "Order not found" });
-
-    getIO().emit("filesUploaded", {
-      orderId: order._id,
-      editedFiles: order.editedFiles,
-    });
 
     res.json(order);
   } catch (error) {
@@ -345,12 +334,6 @@ exports.updateOrderStatus = async (req, res) => {
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    getIO().emit("orderStatusUpdated", {
-      orderId: order._id,
-      status: order.status,
-      adminNote: order.adminNote,
-    });
-
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -363,8 +346,6 @@ exports.deleteOrder = async (req, res) => {
     const order = await Order.findByIdAndDelete(req.params.id);
 
     if (!order) return res.status(404).json({ message: "Order not found" });
-
-    getIO().emit("orderDeleted", { orderId: req.params.id });
 
     res.json({ message: "Order deleted" });
   } catch (error) {
