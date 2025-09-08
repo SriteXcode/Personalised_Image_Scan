@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://personalised-image-scan-1.onrender.com/api",
+  baseURL: "https://personalised-image-scan.onrender.com/api",
 });
 
 // Attach token automatically

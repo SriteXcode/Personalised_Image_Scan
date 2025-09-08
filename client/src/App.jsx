@@ -27,7 +27,7 @@ const App = () => {
 
         {/* Admin Dashboard */}
         <Route
-          path="/admin"
+          path="/admin-dashboard"
           element={
             <ProtectedRoute roleRequired="admin">
               <AdminDashboard />

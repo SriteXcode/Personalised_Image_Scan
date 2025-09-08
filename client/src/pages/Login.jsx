@@ -26,7 +26,7 @@ const Login = () => {
       saveAuth(data.token, data.role);
 
       // redirect by role
-      data.role === "admin" ? navigate("/admin") : navigate("/dashboard");
+      data.role === "admin" ? navigate("/admin-dashboard") : navigate("/dashboard");
     } catch (error) {
       alert("Invalid credentials");
     }
