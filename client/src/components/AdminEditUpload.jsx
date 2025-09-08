@@ -13,7 +13,7 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
     const fetchExisting = async () => {
       try {
         const token = localStorage.getItem("token");
-        const { data } = await axios.get(`http://localhost:5000/api/orders/${orderId}`, {
+        const { data } = await API.get(`/orders/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setExistingFiles(data.editedFiles || []);
@@ -55,8 +55,9 @@ const AdminEditUpload = ({ orderId, onUploadSuccess }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      console.log("Uploading with token:", token);
       const { data } = await API.put(
-        `http://localhost:5000/api/orders/${orderId}/upload-edited`,
+        `/orders/${orderId}/upload-edited`,
         formData,
         {
           headers: {

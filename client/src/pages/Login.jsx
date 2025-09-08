@@ -33,6 +33,7 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
 
+      console.log("Saved:", data.token, data.role);
       if (data.role === "admin") {
         navigate("/admin");
       } else {
