@@ -1,35 +1,30 @@
-// src/utils/auth.js
 export const TOKEN_KEY = "token";
+export const ROLE_KEY = "role";
 
-// Save token
-export const saveToken = (token) => {
+// Save token & role
+export const saveAuth = (token, role) => {
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(ROLE_KEY, role);
 };
 
-export const setToken = (token) => {
-  localStorage.setItem(TOKEN_KEY, token);
-};
+export const getToken = () => localStorage.getItem(TOKEN_KEY);
+export const getRole = () => localStorage.getItem(ROLE_KEY);
 
-// Get token
-export const getToken = () => {
-  return localStorage.getItem(TOKEN_KEY);
-};
-
-// Remove token
-export const removeToken = () => {
+export const removeAuth = () => {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(ROLE_KEY);
 };
 
-// Decode JWT (simple base64 decode)
+// Decode JWT safely
 const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
+  } catch {
     return null;
   }
 };
 
-// Check if token expired
+// Check token expiry
 export const isTokenExpired = () => {
   const token = getToken();
   if (!token) return true;
@@ -37,6 +32,6 @@ export const isTokenExpired = () => {
   const decoded = parseJwt(token);
   if (!decoded || !decoded.exp) return true;
 
-  const now = Date.now() / 1000; // current time in seconds
+  const now = Date.now() / 1000;
   return decoded.exp < now;
 };

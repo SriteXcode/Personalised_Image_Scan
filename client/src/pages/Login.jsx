@@ -1,44 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../Api";
+import { saveAuth } from "../utils/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // 🔐 Auto-redirect if already logged in
+  // Auto-redirect if logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-
     if (token && role) {
-      if (role === "admin") {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+      role === "admin" ? navigate("/admin") : navigate("/dashboard");
     }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await API.post("/auth/login", {
-        email,
-        password,
-      });
+      const { data } = await API.post("/auth/login", { email, password });
 
-      // save token + role
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+      // save token & role
+      saveAuth(data.token, data.role);
 
-      console.log("Saved:", data.token, data.role);
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      // redirect by role
+      data.role === "admin" ? navigate("/admin") : navigate("/dashboard");
     } catch (error) {
       alert("Invalid credentials");
     }
@@ -74,13 +62,13 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition "
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
         >
           Login
         </button>
       </form>
       <p>
-        Doesn't have an account? <a href="/register">Register</a>
+        Don’t have an account? <a href="/register" className="text-blue-600">Register</a>
       </p>
     </div>
   );
